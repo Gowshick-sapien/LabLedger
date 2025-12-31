@@ -9,7 +9,11 @@ app.use(express.json());
 
 // ---------- Routes ----------
 const healthRoutes = require("./routes/health.routes");
+const dbTestRoutes = require("./routes/dbTest.routes");
+
 app.use("/health", healthRoutes);
+app.use("/db-test", dbTestRoutes);
+
 
 // ---------- 404 Handler ----------
 app.use((req, res) => {
