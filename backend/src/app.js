@@ -5,6 +5,7 @@ import userRoutes from "./routes/user.routes.js";
 import healthRoutes from "./routes/health.routes.js";
 import dbTestRoutes from "./routes/dbTest.routes.js";
 import teamRoutes from "./routes/team.routes.js";
+import subteamRoutes from "./routes/subteam.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 
 
@@ -17,7 +18,9 @@ app.use(express.json());
 // ---------- Routes ----------
 app.use("/health", healthRoutes);
 app.use("/db-test", dbTestRoutes);
+
 app.use(teamRoutes);
+app.use(subteamRoutes);
 // 👇 AUTH TEST ROUTE
 app.use(userRoutes);
 
