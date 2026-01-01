@@ -4,6 +4,9 @@ import cors from "cors";
 import userRoutes from "./routes/user.routes.js";
 import healthRoutes from "./routes/health.routes.js";
 import dbTestRoutes from "./routes/dbTest.routes.js";
+import teamRoutes from "./routes/team.routes.js";
+import authRoutes from "./routes/auth.routes.js";
+
 
 const app = express();
 
@@ -14,9 +17,12 @@ app.use(express.json());
 // ---------- Routes ----------
 app.use("/health", healthRoutes);
 app.use("/db-test", dbTestRoutes);
-
+app.use(teamRoutes);
 // 👇 AUTH TEST ROUTE
 app.use(userRoutes);
+
+app.use(authRoutes);
+
 
 // ---------- 404 Handler ----------
 app.use((req, res) => {
