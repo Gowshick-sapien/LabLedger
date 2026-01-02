@@ -7,6 +7,8 @@ import dbTestRoutes from "./routes/dbTest.routes.js";
 import teamRoutes from "./routes/team.routes.js";
 import subteamRoutes from "./routes/subteam.routes.js";
 import authRoutes from "./routes/auth.routes.js";
+import projectRoutes from "./routes/project.routes.js";
+
 
 
 const app = express();
@@ -25,6 +27,8 @@ app.use(subteamRoutes);
 app.use(userRoutes);
 
 app.use(authRoutes);
+
+app.use("/projects", projectRoutes);
 
 
 // ---------- 404 Handler ----------

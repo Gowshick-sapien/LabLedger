@@ -1,6 +1,6 @@
 import { verifyToken } from "../services/jwt.service.js";
 
-export const authMiddleware = (req, res, next) => {
+const authMiddleware = (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
 
@@ -22,3 +22,5 @@ export const authMiddleware = (req, res, next) => {
     return res.status(401).json({ message: "Unauthorized: Invalid token" });
   }
 };
+
+export default authMiddleware;

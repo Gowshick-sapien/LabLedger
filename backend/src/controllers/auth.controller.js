@@ -74,8 +74,8 @@ export const login = async (req, res) => {
     const payload = {
       userId: user.id,
       role: user.role,
-      teamId: user.team_id,
-      subteamId: user.subteam_id,
+      team_id: user.team_id,
+      subteam_id: user.subteam_id,
     };
 
     const token = signToken(payload);

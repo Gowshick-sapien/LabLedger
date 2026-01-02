@@ -1,5 +1,6 @@
 import express from "express";
-import { authMiddleware } from "../middleware/auth.middleware.js";
+import authMiddleware from "../middleware/auth.middleware.js";
+
 import {
   assignUserToSubTeam,
   listUsers,
