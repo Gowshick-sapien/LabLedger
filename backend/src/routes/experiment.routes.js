@@ -1,3 +1,4 @@
+import { authorize } from "../middleware/rbac.middleware.js";
 import express from "express";
 import {
   createExperiment,
@@ -12,7 +13,12 @@ const router = express.Router();
 router.use(authMiddleware);
 
 // POST /modules/:moduleId/experiments
-router.post("/modules/:moduleId/experiments", createExperiment);
+router.post(
+  "/modules/:moduleId/experiments",
+  authorize("CREATE_EXPERIMENT"),
+  createExperiment
+);
+
 
 // GET /modules/:moduleId/experiments
 router.get("/modules/:moduleId/experiments", listExperimentsByModule);

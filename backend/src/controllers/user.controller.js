@@ -30,9 +30,20 @@ export const assignUserToSubTeam = async (req, res) => {
 
     // Update user's subteam
     await db.query(
-      "UPDATE users SET subteam_id = $1 WHERE id = $2",
+      `
+      UPDATE users
+      SET subteam_id = $1,
+          team_id = (
+            SELECT team_id
+            FROM subteams
+            WHERE id = $1
+          )
+      WHERE id = $2
+      `,
       [subteamId, userId]
     );
+
+
 
     return res.status(200).json({
       message: "User subteam updated successfully",
