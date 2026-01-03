@@ -9,7 +9,7 @@ import subteamRoutes from "./routes/subteam.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import projectRoutes from "./routes/project.routes.js";
 import moduleRoutes from "./routes/module.routes.js";
-
+import experimentRoutes from "./routes/experiment.routes.js";
 
 
 const app = express();
@@ -32,6 +32,9 @@ app.use(authRoutes);
 app.use("/projects", projectRoutes);
 
 app.use("/projects/:projectId/modules", moduleRoutes);
+
+app.use("/", experimentRoutes);
+
 
 // ---------- 404 Handler ----------
 app.use((req, res) => {
