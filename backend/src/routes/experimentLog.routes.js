@@ -16,4 +16,19 @@ router.post("/experiments/:experimentId/logs", addExperimentLog);
 // GET /experiments/:experimentId/logs
 router.get("/experiments/:experimentId/logs", listExperimentLogs);
 
+// Explicitly block log mutation (immutability enforcement)
+
+router.put("/logs/:id", (req, res) => {
+  res.status(405).json({
+    message: "Experiment logs are immutable"
+  });
+});
+
+router.delete("/logs/:id", (req, res) => {
+  res.status(405).json({
+    message: "Experiment logs are immutable"
+  });
+});
+
+
 export default router;
