@@ -11,6 +11,7 @@ import projectRoutes from "./routes/project.routes.js";
 import moduleRoutes from "./routes/module.routes.js";
 import experimentRoutes from "./routes/experiment.routes.js";
 import experimentLogRoutes from "./routes/experimentLog.routes.js";
+import attachmentRoutes from "./routes/attachment.routes.js";
 
 
 const app = express();
@@ -37,6 +38,8 @@ app.use("/projects/:projectId/modules", moduleRoutes);
 app.use("/", experimentRoutes);
 
 app.use("/", experimentLogRoutes);
+
+app.use("/", attachmentRoutes);
 
 // ---------- 404 Handler ----------
 app.use((req, res) => {
