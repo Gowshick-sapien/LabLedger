@@ -8,6 +8,7 @@ import teamRoutes from "./routes/team.routes.js";
 import subteamRoutes from "./routes/subteam.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import projectRoutes from "./routes/project.routes.js";
+import moduleRoutes from "./routes/module.routes.js";
 
 
 
@@ -30,6 +31,7 @@ app.use(authRoutes);
 
 app.use("/projects", projectRoutes);
 
+app.use("/projects/:projectId/modules", moduleRoutes);
 
 // ---------- 404 Handler ----------
 app.use((req, res) => {
