@@ -1,35 +1,36 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { fetchProjectById } from "../api/project.api";
 import Breadcrumb from "../components/layout/Breadcrumb";
 import PageContainer from "../components/layout/PageContainer";
+import { fetchProjectById } from "../api/project.api";
+import { fetchModulesByProject } from "../api/module.api";
 
 export default function ProjectPage() {
   const { id } = useParams();
   const navigate = useNavigate();
 
   const [project, setProject] = useState(null);
+  const [modules, setModules] = useState([]);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const loadProject = async () => {
+    const loadData = async () => {
       try {
-        const data = await fetchProjectById(id);
-        setProject(data);
+        const projectData = await fetchProjectById(id);
+        setProject(projectData);
+
+        const moduleData = await fetchModulesByProject(id);
+        setModules(moduleData);
       } catch {
-        setError("Failed to load project");
+        setError("Failed to load project data");
       }
     };
-    loadProject();
+
+    loadData();
   }, [id]);
 
-  if (error) {
-    return <PageContainer>{error}</PageContainer>;
-  }
-
-  if (!project) {
-    return <PageContainer>Loading...</PageContainer>;
-  }
+  if (error) return <PageContainer>{error}</PageContainer>;
+  if (!project) return <PageContainer>Loading...</PageContainer>;
 
   return (
     <PageContainer>
@@ -45,12 +46,12 @@ export default function ProjectPage() {
 
       <h2 className="text-lg font-medium mb-3">Modules</h2>
 
-      {project.modules?.length === 0 && (
+      {modules.length === 0 && (
         <p className="text-gray-500">No modules created yet</p>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {project.modules?.map((module) => (
+        {modules.map((module) => (
           <div
             key={module.id}
             className="bg-white p-4 rounded border shadow-sm"
