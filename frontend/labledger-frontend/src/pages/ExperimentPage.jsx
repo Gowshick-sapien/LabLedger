@@ -2,17 +2,30 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Breadcrumb from "../components/layout/Breadcrumb";
 import PageContainer from "../components/layout/PageContainer";
+import { useAuth } from "../hooks/useAuth";
+
 import {
   fetchExperimentById,
   fetchLogsByExperiment,
+  addExperimentLog,
 } from "../api/experiment.api";
 
 export default function ExperimentPage() {
   const { id } = useParams();
+  const { user } = useAuth();
+
+  const canWrite =
+    user?.role === "lead" || user?.role === "contributor";
 
   const [experiment, setExperiment] = useState(null);
   const [logs, setLogs] = useState([]);
   const [error, setError] = useState("");
+
+  // Add-log form state
+  const [procedure, setProcedure] = useState("");
+  const [observations, setObservations] = useState("");
+  const [outcome, setOutcome] = useState("");
+  const [parameters, setParameters] = useState({});
 
   useEffect(() => {
     const loadData = async () => {
@@ -46,9 +59,13 @@ export default function ExperimentPage() {
 
       {/* Experiment Metadata */}
       <div className="mb-8">
-        <h1 className="text-2xl font-semibold mb-2">{experiment.title}</h1>
+        <h1 className="text-2xl font-semibold mb-2">
+          {experiment.title}
+        </h1>
 
-        <p className="text-gray-700 mb-4">{experiment.objective}</p>
+        <p className="text-gray-700 mb-4">
+          {experiment.objective}
+        </p>
 
         <div className="text-sm text-gray-500 space-y-1">
           <p>Created by: {experiment.created_by_name || "—"}</p>
@@ -58,6 +75,63 @@ export default function ExperimentPage() {
           </p>
         </div>
       </div>
+
+      {/* ADD LOG (Append-only, Role-aware) */}
+      {canWrite && (
+        <div className="mb-8 bg-white p-4 rounded border">
+          <h2 className="text-lg font-medium mb-3">Add Log</h2>
+
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+
+              await addExperimentLog(id, {
+                procedure,
+                observations,
+                outcome,
+                parameters,
+              });
+
+              const updatedLogs = await fetchLogsByExperiment(id);
+              setLogs(updatedLogs);
+
+              setProcedure("");
+              setObservations("");
+              setOutcome("");
+              setParameters({});
+            }}
+            className="space-y-3"
+          >
+            <textarea
+              className="w-full border p-2 rounded"
+              placeholder="Procedure"
+              value={procedure}
+              onChange={(e) => setProcedure(e.target.value)}
+              required
+            />
+
+            <textarea
+              className="w-full border p-2 rounded"
+              placeholder="Observations"
+              value={observations}
+              onChange={(e) => setObservations(e.target.value)}
+              required
+            />
+
+            <input
+              className="w-full border p-2 rounded"
+              placeholder="Outcome"
+              value={outcome}
+              onChange={(e) => setOutcome(e.target.value)}
+              required
+            />
+
+            <button className="bg-slate-900 text-white px-4 py-2 rounded">
+              Append Log
+            </button>
+          </form>
+        </div>
+      )}
 
       {/* Logs Timeline */}
       <div>
@@ -92,14 +166,20 @@ export default function ExperimentPage() {
               {log.parameters &&
                 Object.keys(log.parameters).length > 0 && (
                   <div className="mt-3">
-                    <h4 className="text-sm font-medium mb-1">Parameters</h4>
+                    <h4 className="text-sm font-medium mb-1">
+                      Parameters
+                    </h4>
                     <table className="text-sm w-full border">
                       <tbody>
                         {Object.entries(log.parameters).map(
                           ([key, value]) => (
                             <tr key={key} className="border-t">
-                              <td className="px-2 py-1 font-medium">{key}</td>
-                              <td className="px-2 py-1">{value}</td>
+                              <td className="px-2 py-1 font-medium">
+                                {key}
+                              </td>
+                              <td className="px-2 py-1">
+                                {value}
+                              </td>
                             </tr>
                           )
                         )}
