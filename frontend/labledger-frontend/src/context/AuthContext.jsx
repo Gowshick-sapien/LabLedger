@@ -17,7 +17,9 @@ export function AuthProvider({ children }) {
       }
       try {
         const me = await getMe();
-        setUser(me);
+        if (me) {
+          setUser(me);
+        }
       } catch {
         localStorage.removeItem("token");
       } finally {
