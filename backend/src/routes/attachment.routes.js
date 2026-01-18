@@ -3,7 +3,7 @@ import upload from "../middleware/upload.middleware.js";
 import { authenticate } from "../middleware/auth.middleware.js";
 
 import {
-  uploadAttachment,
+  uploadLogAttachment,
   getAttachment
 } from "../controllers/attachment.controller.js";
 
@@ -13,7 +13,7 @@ router.post(
   "/logs/:logId/attachment",
   authenticate,
   upload.single("file"),
-  uploadAttachment
+  uploadLogAttachment
 );
 
 router.get(

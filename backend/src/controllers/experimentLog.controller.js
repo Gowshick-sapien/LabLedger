@@ -11,7 +11,7 @@ export const addExperimentLog = async (req, res) => {
 
     if (!procedure || !observations || !outcome) {
       return res.status(400).json({
-        message: "procedure, observations, and outcome are required"
+        message: "procedure, observations, and outcome are required",
       });
     }
 
@@ -36,7 +36,7 @@ export const addExperimentLog = async (req, res) => {
         procedure,
         observations,
         outcome,
-        parameters ? JSON.stringify(parameters) : null
+        parameters ? JSON.stringify(parameters) : null,
       ]
     );
 
@@ -50,22 +50,28 @@ export const addExperimentLog = async (req, res) => {
 /**
  * GET /experiments/:experimentId/logs
  * Read-only
+ * ✅ NOW INCLUDES ATTACHMENT URL
  */
 export const listExperimentLogs = async (req, res) => {
   try {
     const { experimentId } = req.params;
 
     const result = await db.query(
-      `SELECT
-         id,
-         procedure,
-         observations,
-         outcome,
-         parameters,
-         created_at
-       FROM experiment_logs
-       WHERE experiment_id = $1
-       ORDER BY created_at ASC`,
+      `
+      SELECT
+        el.id,
+        el.procedure,
+        el.observations,
+        el.outcome,
+        el.parameters,
+        el.created_at,
+        a.storage_url AS attachment_url
+      FROM experiment_logs el
+      LEFT JOIN attachments a
+        ON a.log_id = el.id
+      WHERE el.experiment_id = $1
+      ORDER BY el.created_at ASC
+      `,
       [experimentId]
     );
 
@@ -75,3 +81,7 @@ export const listExperimentLogs = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch logs" });
   }
 };
+
+
+
+

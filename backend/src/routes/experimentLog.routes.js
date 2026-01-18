@@ -4,6 +4,10 @@ import {
   listExperimentLogs
 } from "../controllers/experimentLog.controller.js";
 import { authenticate } from "../middleware/auth.middleware.js";
+import { uploadLogAttachment } from "../controllers/attachment.controller.js";
+import multer from "multer";
+
+const upload = multer({ storage: multer.memoryStorage() });
 
 
 const router = express.Router();
@@ -30,6 +34,14 @@ router.delete("/logs/:id", (req, res) => {
     message: "Experiment logs are immutable"
   });
 });
+
+// POST /experiment-logs/:logId/attachment
+router.post(
+  "/experiment-logs/:logId/attachment",
+  upload.single("file"),
+  uploadLogAttachment
+);
+
 
 
 export default router;

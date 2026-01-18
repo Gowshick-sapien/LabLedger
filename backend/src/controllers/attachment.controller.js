@@ -1,8 +1,8 @@
 import db from "../config/db.js";
 import { uploadFile } from "../services/storage.service.js";
 
-
-export const uploadAttachment = async (req, res) => {
+// ✅ RENAMED EXPORT (THIS FIXES THE CRASH)
+export const uploadLogAttachment = async (req, res) => {
   try {
     const { logId } = req.params;
 
@@ -71,7 +71,7 @@ export const getAttachment = async (req, res) => {
     return res.json({
       fileName: result.rows[0].file_name,
       fileType: result.rows[0].file_type,
-      url: result.rows[0].storage_url
+      url: result.rows[0].storage_url,
     });
   } catch (err) {
     console.error(err);
