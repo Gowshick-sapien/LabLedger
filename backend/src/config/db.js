@@ -3,6 +3,9 @@ const { Pool } = pkg;
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
 
 pool.on("connect", () => {
@@ -13,7 +16,7 @@ const query = (text, params) => {
   return pool.query(text, params);
 };
 
-// ✅ default export (important)
+// ✅ default export (unchanged contract)
 export default {
   pool,
   query,

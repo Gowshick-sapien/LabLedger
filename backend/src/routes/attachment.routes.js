@@ -1,6 +1,7 @@
 import express from "express";
 import upload from "../middleware/upload.middleware.js";
-import authMiddleware from "../middleware/auth.middleware.js";
+import { authenticate } from "../middleware/auth.middleware.js";
+
 import {
   uploadAttachment,
   getAttachment
@@ -10,14 +11,14 @@ const router = express.Router();
 
 router.post(
   "/logs/:logId/attachment",
-  authMiddleware,
+  authenticate,
   upload.single("file"),
   uploadAttachment
 );
 
 router.get(
   "/logs/:logId/attachment",
-  authMiddleware,
+  authenticate,
   getAttachment
 );
 

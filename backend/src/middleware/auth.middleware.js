@@ -1,26 +1,28 @@
 import { verifyToken } from "../services/jwt.service.js";
 
-const authMiddleware = (req, res, next) => {
+export const authenticate = (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
+    console.log("AUTH HEADER:", authHeader);
 
-    // No token provided
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res.status(401).json({ message: "Unauthorized: No token provided" });
+      return res.status(401).json({
+        message: "Unauthorized: No token provided",
+      });
     }
 
     const token = authHeader.split(" ")[1];
+    console.log("TOKEN RECEIVED:", token);
 
-    // Verify token
     const decoded = verifyToken(token);
+    console.log("DECODED TOKEN:", decoded);
 
-    // Attach decoded payload to request
     req.user = decoded;
-
     next();
   } catch (error) {
-    return res.status(401).json({ message: "Unauthorized: Invalid token" });
+    console.error("AUTH ERROR:", error.message);
+    return res.status(401).json({
+      message: "Unauthorized: Invalid token",
+    });
   }
 };
-
-export default authMiddleware;

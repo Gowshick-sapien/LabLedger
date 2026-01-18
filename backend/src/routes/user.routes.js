@@ -1,5 +1,6 @@
 import express from "express";
-import authMiddleware from "../middleware/auth.middleware.js";
+import { authenticate } from "../middleware/auth.middleware.js";
+
 
 import {
   assignUserToSubTeam,
@@ -9,7 +10,7 @@ import {
 const router = express.Router();
 
 // GET /me
-router.get("/me", authMiddleware, (req, res) => {
+router.get("/me", authenticate, (req, res) => {
   return res.status(200).json({
     userId: req.user.userId,
     role: req.user.role,
@@ -19,9 +20,9 @@ router.get("/me", authMiddleware, (req, res) => {
 });
 
 // PATCH /users/:id/subteam
-router.patch("/users/:id/subteam", authMiddleware, assignUserToSubTeam);
+router.patch("/users/:id/subteam", authenticate, assignUserToSubTeam);
 
 // GET /users
-router.get("/users", authMiddleware, listUsers);
+router.get("/users", authenticate, listUsers);
 
 export default router;

@@ -4,12 +4,13 @@ import {
   listProjects,
   getProjectById
 } from "../controllers/project.controller.js";
-import authMiddleware from "../middleware/auth.middleware.js";
+import { authenticate } from "../middleware/auth.middleware.js";
+
 
 const router = express.Router();
 
 // All project routes require authentication
-router.use(authMiddleware);
+router.use(authenticate);
 
 router.post("/", createProject);
 router.get("/", listProjects);

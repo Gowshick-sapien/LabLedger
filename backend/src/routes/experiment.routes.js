@@ -5,12 +5,13 @@ import {
   listExperimentsByModule,
   getExperimentById
 } from "../controllers/experiment.controller.js";
-import authMiddleware from "../middleware/auth.middleware.js";
+import { authenticate } from "../middleware/auth.middleware.js";
+
 
 const router = express.Router();
 
 // All routes require auth
-router.use(authMiddleware);
+router.use(authenticate);
 
 // POST /modules/:moduleId/experiments
 router.post(

@@ -1,13 +1,14 @@
 import express from "express";
 import { createSubTeam, getSubTeams } from "../controllers/subteam.controller.js";
-import authMiddleware from "../middleware/auth.middleware.js";
+import { authenticate } from "../middleware/auth.middleware.js";
+
 
 const router = express.Router();
 
 // Create subteam
-router.post("/subteams", authMiddleware, createSubTeam);
+router.post("/subteams", authenticate, createSubTeam);
 
 // List subteams
-router.get("/subteams", authMiddleware, getSubTeams);
+router.get("/subteams", authenticate, getSubTeams);
 
 export default router;

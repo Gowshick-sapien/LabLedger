@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
 
@@ -29,7 +30,8 @@ app.use(subteamRoutes);
 // 👇 AUTH TEST ROUTE
 app.use(userRoutes);
 
-app.use(authRoutes);
+app.use("/auth", authRoutes);
+
 
 app.use("/projects", projectRoutes);
 

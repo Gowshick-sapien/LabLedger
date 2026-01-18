@@ -3,12 +3,13 @@ import {
   addExperimentLog,
   listExperimentLogs
 } from "../controllers/experimentLog.controller.js";
-import authMiddleware from "../middleware/auth.middleware.js";
+import { authenticate } from "../middleware/auth.middleware.js";
+
 
 const router = express.Router();
 
 // all log routes require auth
-router.use(authMiddleware);
+router.use(authenticate);
 
 // POST /experiments/:experimentId/logs
 router.post("/experiments/:experimentId/logs", addExperimentLog);

@@ -14,5 +14,13 @@ export const signToken = (payload) => {
 };
 
 export const verifyToken = (token) => {
-  return jwt.verify(token, JWT_SECRET);
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    console.log("JWT VERIFIED OK:", decoded);
+    return decoded;
+  } catch (err) {
+    console.error("JWT VERIFY FAILED:", err.name, err.message);
+    throw err;
+  }
 };
+

@@ -1,5 +1,6 @@
 import express from "express";
-import authMiddleware from "../middleware/auth.middleware.js";
+import { authenticate } from "../middleware/auth.middleware.js";
+
 import {
   createModule,
   listModules
@@ -7,7 +8,7 @@ import {
 
 const router = express.Router({ mergeParams: true });
 
-router.use(authMiddleware);
+router.use(authenticate);
 
 router.post("/", createModule);
 router.get("/", listModules);
