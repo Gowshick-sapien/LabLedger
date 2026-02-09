@@ -80,12 +80,14 @@ To build a system that formalizes how engineering teams think, experiment, fail,
 
 ## MoSCoW Prioritization
 
+## MoSCoW Prioritization
+
 | Priority | Features |
 |--------|---------|
-| **Must Have** | Authentication, Projects, Experiments, Append-only Logs, RBAC |
-| **Should Have** | File uploads, custom parameters |
-| **Could Have** | Comments, data export |
-| **Won’t Have** | Charts, analytics, machine learning |
+| **Must Have** | Authentication, Team & SubTeam structure, Projects, Modules, Experiments, Append-only Logs, Role-Based Access Control |
+| **Should Have** | File uploads for experiment evidence, Custom user-defined parameters |
+| **Could Have** | Comments on logs, Data export |
+| **Won’t Have** | Charts, analytics dashboards, machine learning, real-time collaboration |
 
 ---
 
