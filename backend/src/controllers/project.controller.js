@@ -12,6 +12,15 @@ export const createProject = async (req, res) => {
     }
 
     let teamId = user.team_id;
+
+    if (!teamId) {
+      const defaultTeam = await db.query("SELECT id FROM teams LIMIT 1");
+      if (defaultTeam.rows.length === 0) {
+        return res.status(400).json({ message: "No active team exists in the system to assign this project to." });
+      }
+      teamId = defaultTeam.rows[0].id;
+    }
+
     let finalSubteamId = null;
 
     if (projectType === "SUBTEAM") {

@@ -5,6 +5,9 @@ import { authenticate } from "../middleware/auth.middleware.js";
 import {
   assignUserToSubTeam,
   listUsers,
+  getPendingUsers,
+  approveUser,
+  rejectUser
 } from "../controllers/user.controller.js";
 
 const router = express.Router();
@@ -18,6 +21,18 @@ router.get("/me", authenticate, (req, res) => {
     subteamId: req.user.subteamId,
   });
 });
+
+// Admin ONLY Middleware guard for below routes
+const checkAdmin = (req, res, next) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ message: "Forbidden: Admins only" });
+  }
+  next();
+};
+
+router.get("/users/pending", authenticate, checkAdmin, getPendingUsers);
+router.patch("/users/:id/approve", authenticate, checkAdmin, approveUser);
+router.delete("/users/:id/reject", authenticate, checkAdmin, rejectUser);
 
 // PATCH /users/:id/subteam
 router.patch("/users/:id/subteam", authenticate, assignUserToSubTeam);

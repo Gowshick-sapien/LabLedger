@@ -67,7 +67,8 @@ export const listUsers = async (req, res) => {
         u.team_id,
         t.name AS team_name,
         u.subteam_id,
-        s.name AS subteam_name
+        s.name AS subteam_name,
+        u.status
       FROM users u
       LEFT JOIN teams t ON u.team_id = t.id
       LEFT JOIN subteams s ON u.subteam_id = s.id
@@ -78,6 +79,65 @@ export const listUsers = async (req, res) => {
     return res.status(200).json(result.rows);
   } catch (error) {
     console.error("List users error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const getPendingUsers = async (req, res) => {
+  try {
+    const result = await db.query(`
+      SELECT id, name, email, created_at, role, status
+      FROM users
+      WHERE status = 'pending'
+      ORDER BY created_at ASC
+    `);
+    return res.status(200).json(result.rows);
+  } catch (error) {
+    console.error("Get pending users error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const approveUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { role } = req.body;
+
+    const defaultTeam = await db.query("SELECT id FROM teams LIMIT 1");
+    const teamId = defaultTeam.rows.length > 0 ? defaultTeam.rows[0].id : null;
+
+    const result = await db.query(`
+      UPDATE users
+      SET status = 'approved', role = $1, team_id = $2
+      WHERE id = $3
+      RETURNING id, name, email, role, status
+    `, [role || 'contributor', teamId, userId]);
+
+    if(result.rows.length === 0){
+      return res.status(404).json({ message: "User not found or already approved" });
+    }
+
+    return res.status(200).json(result.rows[0]);
+  } catch (error) {
+    console.error("Approve user error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const rejectUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const result = await db.query(`
+      DELETE FROM users WHERE id = $1 AND status = 'pending' RETURNING id
+    `, [userId]);
+    
+    if(result.rows.length === 0){
+      return res.status(404).json({ message: "User not found or already processed" });
+    }
+    
+    return res.status(200).json({ message: "User rejected and deleted successfully" });
+  } catch (error) {
+    console.error("Reject user error:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };

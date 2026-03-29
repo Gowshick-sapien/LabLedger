@@ -10,6 +10,11 @@ export const fetchExperimentById = async (experimentId) => {
   return res.data;
 };
 
+export const createExperiment = async (moduleId, payload) => {
+  const res = await api.post(`/modules/${moduleId}/experiments`, payload);
+  return res.data;
+};
+
 export const fetchLogsByExperiment = async (experimentId) => {
   const res = await api.get(`/experiments/${experimentId}/logs`);
   return res.data;
@@ -22,6 +27,7 @@ export const addExperimentLog = async (experimentId, payload) => {
   );
   return res.data;
 };
+
 export const uploadLogAttachment = async (logId, file) => {
   const formData = new FormData();
   formData.append("file", file);

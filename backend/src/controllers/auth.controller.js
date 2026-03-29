@@ -52,7 +52,7 @@ export const login = async (req, res) => {
 
     const result = await db.query(
       `
-      SELECT id, password_hash, role, team_id, subteam_id
+      SELECT id, password_hash, role, team_id, subteam_id, status
       FROM users
       WHERE email = $1
       `,
@@ -64,6 +64,10 @@ export const login = async (req, res) => {
     }
 
     const user = result.rows[0];
+
+    if (user.status === 'pending') {
+      return res.status(403).json({ message: "Waiting for admin approval" });
+    }
 
     const isMatch = await comparePassword(password, user.password_hash);
     if (!isMatch) {
