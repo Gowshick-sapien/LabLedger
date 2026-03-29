@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import Breadcrumb from "../components/layout/Breadcrumb";
 import PageContainer from "../components/layout/PageContainer";
-import { fetchProjectById } from "../api/project.api";
+import { fetchProjectById, deleteProject } from "../api/project.api";
 import { fetchModulesByProject, createModule } from "../api/module.api";
+import { useAuth } from "../hooks/useAuth";
 import { Card, CardBody } from "../components/ui/Card";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
@@ -11,6 +12,7 @@ import Input from "../components/ui/Input";
 export default function ProjectPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [project, setProject] = useState(null);
   const [modules, setModules] = useState([]);
@@ -37,6 +39,20 @@ export default function ProjectPage() {
       loadModules();
     } catch (err) {
       setError("Failed to create module");
+    }
+  };
+
+  const handleDeleteProject = async () => {
+    if (!window.confirm("Are you sure you want to completely delete this project? This will permanently erase all modules and experiments within it. This action cannot be undone.")) return;
+    try {
+      await deleteProject(id);
+      navigate("/dashboard");
+    } catch (err) {
+      if (err.response && err.response.data && err.response.data.message) {
+        setError(err.response.data.message);
+      } else {
+        setError("Failed to delete project");
+      }
     }
   };
 
@@ -73,9 +89,16 @@ export default function ProjectPage() {
           <h1 className="text-2xl font-semibold mb-2 text-gh-text">{project.name}</h1>
           <p className="text-gh-text-muted">{project.description}</p>
         </div>
-        <Button variant="primary" onClick={() => setShowNew(!showNew)}>
-          {showNew ? "Cancel" : "New Module"}
-        </Button>
+        <div className="flex gap-2">
+          {user?.role === 'admin' && (
+            <Button variant="danger" onClick={handleDeleteProject}>
+              Delete Project
+            </Button>
+          )}
+          <Button variant="primary" onClick={() => setShowNew(!showNew)}>
+            {showNew ? "Cancel" : "New Module"}
+          </Button>
+        </div>
       </div>
 
       {showNew && (

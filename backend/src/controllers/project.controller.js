@@ -114,3 +114,32 @@ export const getProjectById = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch project" });
   }
 };
+
+export const deleteProject = async (req, res) => {
+  try {
+    const projectId = req.params.id;
+    const userRole = req.user.role;
+    
+    // Validate role is admin
+    if (userRole !== 'admin') {
+      return res.status(403).json({ message: "Forbidden: Only admins can delete projects" });
+    }
+
+    const result = await db.query(
+      "DELETE FROM projects WHERE id = $1 RETURNING id",
+      [projectId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Project not found" });
+    }
+
+    res.json({ message: "Project deleted successfully" });
+  } catch (err) {
+    console.error("Delete project error:", err.message);
+    if (err.code === "23503") { // foreign key violation code in pg
+      return res.status(400).json({ message: "Cannot delete project. Please manually clear all associated experiments and modules first if cascading is disabled." });
+    }
+    res.status(500).json({ message: "Failed to delete project" });
+  }
+};
