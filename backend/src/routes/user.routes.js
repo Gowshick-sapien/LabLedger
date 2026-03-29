@@ -7,7 +7,9 @@ import {
   listUsers,
   getPendingUsers,
   approveUser,
-  rejectUser
+  rejectUser,
+  updateUserRole,
+  deleteUser
 } from "../controllers/user.controller.js";
 
 const router = express.Router();
@@ -33,6 +35,10 @@ const checkAdmin = (req, res, next) => {
 router.get("/users/pending", authenticate, checkAdmin, getPendingUsers);
 router.patch("/users/:id/approve", authenticate, checkAdmin, approveUser);
 router.delete("/users/:id/reject", authenticate, checkAdmin, rejectUser);
+
+// Admin general user management
+router.patch("/users/:id/role", authenticate, checkAdmin, updateUserRole);
+router.delete("/users/:id", authenticate, checkAdmin, deleteUser);
 
 // PATCH /users/:id/subteam
 router.patch("/users/:id/subteam", authenticate, assignUserToSubTeam);

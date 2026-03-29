@@ -141,3 +141,65 @@ export const rejectUser = async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+
+export const updateUserRole = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { role } = req.body;
+
+    if (!role) {
+      return res.status(400).json({ message: "Role is required" });
+    }
+
+    const result = await db.query(
+      `UPDATE users SET role = $1 WHERE id = $2 RETURNING id, name, email, role, status`,
+      [role, userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json(result.rows[0]);
+  } catch (error) {
+    console.error("Update user role error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const deleteUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const adminId = req.user.userId;
+
+    // Shift ownership of any projects owned by the user to the admin
+    await db.query(
+      "UPDATE projects SET project_lead_id = $1 WHERE project_lead_id = $2",
+      [adminId, userId]
+    );
+
+    // Shift ownership of any experiments created by the user to the admin
+    await db.query(
+      "UPDATE experiments SET created_by = $1 WHERE created_by = $2",
+      [adminId, userId]
+    );
+
+    // Hard delete the user
+    const result = await db.query(
+      `DELETE FROM users WHERE id = $1 RETURNING id`,
+      [userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    console.error("Delete user error:", error.message || error);
+    if (error.code === "23503") {
+      return res.status(400).json({ message: "Cannot delete user right now. They might own active projects or resources." });
+    }
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
