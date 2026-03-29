@@ -4,11 +4,12 @@ import db from "../config/db.js";
 
 export const createProject = async (req, res) => {
   try {
-    const { name, description, projectType, subteamId, projectLeadId } = req.body;
+    const { name, description, subteamId } = req.body;
     const user = req.user; // from JWT
+    const projectLeadId = req.body.projectLeadId || user.userId;
 
-    if (!name || !projectType || !projectLeadId) {
-      return res.status(400).json({ message: "Missing required fields" });
+    if (!name || !subteamId || !projectLeadId) {
+      return res.status(400).json({ message: "Missing required fields: name, subteamId, or projectLeadId" });
     }
 
     let teamId = user.team_id;
@@ -21,14 +22,8 @@ export const createProject = async (req, res) => {
       teamId = defaultTeam.rows[0].id;
     }
 
-    let finalSubteamId = null;
-
-    if (projectType === "SUBTEAM") {
-      if (!subteamId) {
-        return res.status(400).json({ message: "subteamId required for SUBTEAM project" });
-      }
-      finalSubteamId = subteamId;
-    }
+    const projectType = "SUBTEAM";
+    const finalSubteamId = subteamId;
 
     const result = await db.query(
       `INSERT INTO projects 
@@ -57,7 +52,9 @@ export const listProjects = async (req, res) => {
       SELECT p.id, p.name, p.project_type, p.project_lead_id
       FROM projects p
       WHERE
-        p.project_type = 'TEAM'
+        $3 = 'admin'
+        OR p.project_lead_id = $4
+        OR p.project_type = 'TEAM'
         OR (
           p.project_type = 'SUBTEAM'
           AND (
@@ -66,7 +63,7 @@ export const listProjects = async (req, res) => {
           )
         )
       `,
-      [user.subteam_id, user.is_team_lead || false]
+      [user.subteam_id, user.is_team_lead || false, user.role, user.userId]
     );
 
     const projects = result.rows.map(p => ({

@@ -151,10 +151,12 @@ export const updateUserRole = async (req, res) => {
       return res.status(400).json({ message: "Role is required" });
     }
 
-    const result = await db.query(
-      `UPDATE users SET role = $1 WHERE id = $2 RETURNING id, name, email, role, status`,
-      [role, userId]
-    );
+    let query = `UPDATE users SET role = $1 WHERE id = $2 RETURNING id, name, email, role, status, subteam_id`;
+    if (role === 'viewer') {
+      query = `UPDATE users SET role = $1, subteam_id = NULL WHERE id = $2 RETURNING id, name, email, role, status, subteam_id`;
+    }
+
+    const result = await db.query(query, [role, userId]);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ message: "User not found" });

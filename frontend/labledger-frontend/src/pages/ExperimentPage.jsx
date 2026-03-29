@@ -16,7 +16,7 @@ import {
 export default function ExperimentPage() {
   const { id } = useParams();
   const { user } = useAuth();
-  const canWrite = user?.role === "lead" || user?.role === "contributor";
+  const canWrite = user?.role === "admin" || user?.role === "lead" || user?.role === "contributor";
 
   const [experiment, setExperiment] = useState(null);
   const [logs, setLogs] = useState([]);
