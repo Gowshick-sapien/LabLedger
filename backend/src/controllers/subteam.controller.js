@@ -8,9 +8,10 @@ export const createSubTeam = async (req, res) => {
     const teamResult = await db.query("SELECT id FROM teams LIMIT 1");
     const teamId = teamResult.rows.length > 0 ? teamResult.rows[0].id : null;
 
+    const adminId = req.user.userId;
     const result = await db.query(
-      "INSERT INTO subteams (name, description, team_id) VALUES ($1, $2, $3) RETURNING *",
-      [name, description, teamId]
+      "INSERT INTO subteams (name, description, team_id, lead_id) VALUES ($1, $2, $3, $4) RETURNING *",
+      [name, description, teamId, adminId]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
@@ -23,7 +24,7 @@ export const listSubTeams = async (req, res) => {
   try {
     const result = await db.query(`
       SELECT 
-        s.id, s.name, s.description,
+        s.id, s.name, s.description, s.lead_id,
         COALESCE(
           (SELECT json_agg(p) FROM projects p WHERE p.subteam_id = s.id), 
           '[]'
@@ -77,5 +78,48 @@ export const deleteSubTeam = async (req, res) => {
       return res.status(400).json({ message: "Cannot delete subteam. It still has projects or users actively assigned to it. Please reassign or clear them first." });
     }
     res.status(500).json({ message: "Failed to delete subteam" });
+  }
+};
+
+export const assignSubTeamLead = async (req, res) => {
+  try {
+    const subteamId = req.params.id;
+    const { lead_id } = req.body;
+
+    // Validate the new lead
+    const userResult = await db.query(
+      "SELECT id, role, subteam_id FROM users WHERE id = $1",
+      [lead_id]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ message: "Lead user not found" });
+    }
+
+    const leadUser = userResult.rows[0];
+
+    // Must be admin or contributor
+    if (leadUser.role === "viewer") {
+      return res.status(400).json({ message: "A viewer cannot be a subteam lead" });
+    }
+
+    // Must be in the subteam OR an admin
+    if (leadUser.role !== "admin" && leadUser.subteam_id !== parseInt(subteamId)) {
+      return res.status(400).json({ message: "Lead must belong to this subteam" });
+    }
+
+    const result = await db.query(
+      "UPDATE subteams SET lead_id = $1 WHERE id = $2 RETURNING *",
+      [lead_id, subteamId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Subteam not found" });
+    }
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("Assign subteam lead error:", err);
+    res.status(500).json({ message: "Failed to assign subteam lead" });
   }
 };

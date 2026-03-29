@@ -43,7 +43,15 @@ export const assignUserToSubTeam = async (req, res) => {
       [subteamId, userId]
     );
 
-
+    // Fallback subteam lead to admin if they are removed from their current subteam
+    const adminRes = await db.query("SELECT id FROM users WHERE role = 'admin' LIMIT 1");
+    const adminId = adminRes.rows.length > 0 ? adminRes.rows[0].id : null;
+    if (adminId) {
+       await db.query(
+         "UPDATE subteams SET lead_id = $1 WHERE lead_id = $2 AND id != $3",
+         [adminId, userId, subteamId || -1]
+       );
+    }
 
     return res.status(200).json({
       message: "User subteam updated successfully",
@@ -162,6 +170,15 @@ export const updateUserRole = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
+    if (role === 'viewer') {
+      // Fallback subteam lead to an admin if this user was a lead
+      const adminRes = await db.query("SELECT id FROM users WHERE role = 'admin' LIMIT 1");
+      const adminId = adminRes.rows.length > 0 ? adminRes.rows[0].id : null;
+      if (adminId) {
+        await db.query("UPDATE subteams SET lead_id = $1 WHERE lead_id = $2", [adminId, userId]);
+      }
+    }
+
     return res.status(200).json(result.rows[0]);
   } catch (error) {
     console.error("Update user role error:", error);
@@ -183,6 +200,12 @@ export const deleteUser = async (req, res) => {
     // Shift ownership of any experiments created by the user to the admin
     await db.query(
       "UPDATE experiments SET created_by = $1 WHERE created_by = $2",
+      [adminId, userId]
+    );
+
+    // Fallback subteam lead to an admin if this user was a lead
+    await db.query(
+      "UPDATE subteams SET lead_id = $1 WHERE lead_id = $2",
       [adminId, userId]
     );
 

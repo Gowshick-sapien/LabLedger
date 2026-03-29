@@ -49,7 +49,7 @@ export const listProjects = async (req, res) => {
 
     const result = await db.query(
       `
-      SELECT p.id, p.name, p.project_type, p.project_lead_id
+      SELECT p.id, p.name, p.project_type, p.project_lead_id, p.subteam_id
       FROM projects p
       WHERE
         $3 = 'admin'
@@ -69,6 +69,7 @@ export const listProjects = async (req, res) => {
     const projects = result.rows.map(p => ({
       id: p.id,
       name: p.name,
+      subteam_id: p.subteam_id,
       projectType: p.project_type,
       userRole:
         p.project_lead_id === user.userId

@@ -132,33 +132,78 @@ export default function Dashboard() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {projects.map((project) => (
-          <Card key={project.id} className="hover:border-gh-border-active transition-colors">
-            <CardBody className="flex flex-col h-full bg-gh-bg-secondary">
-              <div className="flex items-start justify-between">
-                <div>
-                  <Link 
-                    to={`/projects/${project.id}`}
-                    className="text-gh-link text-base font-semibold hover:underline block"
-                  >
-                    {project.name}
-                  </Link>
-                  <div className="flex items-center gap-3 mt-3 text-xs text-gh-text-muted">
-                    <span className="flex items-center gap-1.5">
-                      <span className="w-2.5 h-2.5 rounded-full bg-[#d2a8ff] inline-block"></span>
-                      SUBTEAM
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <svg className="w-3 h-3 text-gh-text-muted" fill="currentColor" viewBox="0 0 16 16"><path d="M10.561 8.073a6.005 6.005 0 0 1 3.432 5.142.75.75 0 1 1-1.498.07 4.5 4.5 0 0 0-8.99 0 .75.75 0 0 1-1.498-.07 6.004 6.004 0 0 1 3.431-5.142 3.999 3.999 0 1 1 5.123 0ZM10.5 5a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0Z"></path></svg>
-                      {project.role || "Member"}
-                    </span>
-                  </div>
-                </div>
+      <div className="space-y-8">
+        {subteams.map(subteam => {
+          const subteamProjects = projects.filter(p => p.subteam_id === subteam.id);
+          if (subteamProjects.length === 0) return null;
+          return (
+            <div key={subteam.id} className="pt-2">
+              <h2 className="text-lg font-medium text-gh-text mb-4 border-b border-gh-border pb-2">{subteam.name}</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {subteamProjects.map((project) => (
+                  <Card key={project.id} className="hover:border-gh-border-active transition-colors">
+                    <CardBody className="flex flex-col h-full bg-gh-bg-secondary">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <Link 
+                            to={`/projects/${project.id}`}
+                            className="text-gh-link text-base font-semibold hover:underline block"
+                          >
+                            {project.name}
+                          </Link>
+                          <div className="flex items-center gap-3 mt-3 text-xs text-gh-text-muted">
+                            <span className="flex items-center gap-1.5">
+                              <span className="w-2.5 h-2.5 rounded-full bg-[#d2a8ff] inline-block"></span>
+                              SUBTEAM
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <svg className="w-3 h-3 text-gh-text-muted" fill="currentColor" viewBox="0 0 16 16"><path d="M10.561 8.073a6.005 6.005 0 0 1 3.432 5.142.75.75 0 1 1-1.498.07 4.5 4.5 0 0 0-8.99 0 .75.75 0 0 1-1.498-.07 6.004 6.004 0 0 1 3.431-5.142 3.999 3.999 0 1 1 5.123 0ZM10.5 5a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0Z"></path></svg>
+                              {project.userRole || "Member"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </CardBody>
+                  </Card>
+                ))}
               </div>
-            </CardBody>
-          </Card>
-        ))}
+            </div>
+          );
+        })}
+        {/* Render projects that don't belong to any subteam */}
+        {projects.filter(p => !p.subteam_id).length > 0 && (
+          <div className="pt-2 border-t border-gh-border mt-8">
+            <h2 className="text-lg font-medium text-gh-text mt-4 mb-4 border-b border-gh-border pb-2">Unassigned Projects</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {projects.filter(p => !p.subteam_id).map((project) => (
+                <Card key={project.id} className="hover:border-gh-border-active transition-colors">
+                  <CardBody className="flex flex-col h-full bg-gh-bg-secondary">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <Link 
+                          to={`/projects/${project.id}`}
+                          className="text-gh-link text-base font-semibold hover:underline block"
+                        >
+                          {project.name}
+                        </Link>
+                        <div className="flex items-center gap-3 mt-3 text-xs text-gh-text-muted">
+                          <span className="flex items-center gap-1.5">
+                            <span className="w-2.5 h-2.5 rounded-full bg-[#d2a8ff] inline-block"></span>
+                            TEAM
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <svg className="w-3 h-3 text-gh-text-muted" fill="currentColor" viewBox="0 0 16 16"><path d="M10.561 8.073a6.005 6.005 0 0 1 3.432 5.142.75.75 0 1 1-1.498.07 4.5 4.5 0 0 0-8.99 0 .75.75 0 0 1-1.498-.07 6.004 6.004 0 0 1 3.431-5.142 3.999 3.999 0 1 1 5.123 0ZM10.5 5a2.5 2.5 0 1 0-5 0 2.5 2.5 0 0 0 5 0Z"></path></svg>
+                            {project.userRole || "Member"}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardBody>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </PageContainer>
   );

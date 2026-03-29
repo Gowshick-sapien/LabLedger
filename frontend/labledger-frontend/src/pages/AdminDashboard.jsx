@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { fetchPendingUsers, approveUser, rejectUser, fetchUsers, updateUserRole, deleteUser, updateUserSubteam } from "../api/user.api";
-import { fetchSubteams, createSubteam, deleteSubteam } from "../api/subteam.api";
+import { fetchSubteams, createSubteam, deleteSubteam, updateSubteamLead } from "../api/subteam.api";
 import PageContainer from "../components/layout/PageContainer";
 import { Card, CardBody } from "../components/ui/Card";
 import Button from "../components/ui/Button";
@@ -115,6 +115,19 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleUpdateLead = async (subteamId, leadId) => {
+    try {
+      await updateSubteamLead(subteamId, leadId);
+      loadData();
+    } catch (err) {
+      if (err.response?.data?.message) {
+        setApiError(err.response.data.message);
+      } else {
+        setApiError("Failed to update subteam lead.");
+      }
+    }
+  };
+
   const handleDeleteSubteam = async (subteamId, subteamName) => {
     const reason = window.prompt(`CRITICAL: You are about to delete subteam '${subteamName}'.\nPlease provide a mandatory reason for this deletion:`);
     if (reason === null) return; 
@@ -206,18 +219,46 @@ export default function AdminDashboard() {
                   </div>
                   {/* Members Column */}
                   <div>
-                    <h4 className="text-xs uppercase font-semibold text-gh-text-muted mb-2 tracking-wider">Assigned Members</h4>
-                     {st.members.length === 0 ? (
+                    <div className="flex justify-between items-center mb-2">
+                       <h4 className="text-xs uppercase font-semibold text-gh-text-muted tracking-wider">Assigned Members & Lead</h4>
+                    </div>
+                    {st.members.length === 0 ? (
                       <span className="text-xs text-gh-text-muted">None</span>
                     ) : (
-                      <ul className="text-sm space-y-1 text-gh-text">
-                        {st.members.map(m => (
-                          <li key={m.id} className="flex justify-between items-center group">
-                            <span>{m.name}</span>
-                            <span className="text-xs text-gh-text-muted opacity-70 border border-gh-border rounded px-1">{m.role}</span>
-                          </li>
-                        ))}
-                      </ul>
+                      <>
+                        <div className="mb-3">
+                          <label className="text-xs text-gh-text-muted block mb-1">Select Lead:</label>
+                          <select 
+                            className="bg-gh-bg border border-gh-border text-gh-text rounded px-2 py-1 text-xs outline-none w-full focus:border-gh-blue"
+                            value={st.lead_id || ""}
+                            onChange={(e) => handleUpdateLead(st.id, e.target.value)}
+                          >
+                            <option value="" disabled>Select a lead...</option>
+                            {st.members.filter(m => m.role !== "viewer").map((m) => (
+                               <option key={m.id} value={m.id}>{m.name} ({m.role})</option>
+                            ))}
+                            {/* Option for admins not in subteam but who might be current lead */}
+                            {!st.members.some(m => m.id === st.lead_id) && activeUsers.find(u => u.id === st.lead_id) && (
+                                <option value={st.lead_id}>
+                                  {activeUsers.find(u => u.id === st.lead_id).name} (Admin Default)
+                                </option>
+                            )}
+                          </select>
+                        </div>
+                        <ul className="text-sm space-y-1 text-gh-text">
+                          {st.members.map(m => (
+                            <li key={m.id} className="flex items-center group p-1 rounded hover:bg-gh-bg">
+                              <span className="flex-1">{m.name}</span>
+                              <div className="flex items-center gap-2">
+                                {m.id === st.lead_id && (
+                                  <span className="text-[10px] font-bold tracking-widest text-[#d2a8ff] border border-[#d2a8ff]/30 bg-[#d2a8ff]/10 rounded px-1.5 py-0.5">LEAD</span>
+                                )}
+                                <span className="text-xs text-gh-text-muted opacity-70 border border-gh-border rounded px-1">{m.role}</span>
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      </>
                     )}
                   </div>
                 </div>
