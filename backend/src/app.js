@@ -1,0 +1,61 @@
+import "dotenv/config";
+import express from "express";
+import cors from "cors";
+
+import userRoutes from "./routes/user.routes.js";
+import healthRoutes from "./routes/health.routes.js";
+import dbTestRoutes from "./routes/dbTest.routes.js";
+import teamRoutes from "./routes/team.routes.js";
+import subteamRoutes from "./routes/subteam.routes.js";
+import authRoutes from "./routes/auth.routes.js";
+import projectRoutes from "./routes/project.routes.js";
+import moduleRoutes from "./routes/module.routes.js";
+import experimentRoutes from "./routes/experiment.routes.js";
+import experimentLogRoutes from "./routes/experimentLog.routes.js";
+import attachmentRoutes from "./routes/attachment.routes.js";
+
+
+const app = express();
+
+// ---------- Global Middleware ----------
+app.use(cors());
+app.use(express.json());
+
+// ---------- Routes ----------
+app.use("/health", healthRoutes);
+app.use("/db-test", dbTestRoutes);
+
+app.use(teamRoutes);
+app.use(subteamRoutes);
+// 👇 AUTH TEST ROUTE
+app.use(userRoutes);
+
+app.use("/auth", authRoutes);
+
+
+app.use("/projects", projectRoutes);
+
+app.use("/projects/:projectId/modules", moduleRoutes);
+
+app.use("/", experimentRoutes);
+
+app.use("/", experimentLogRoutes);
+
+app.use("/", attachmentRoutes);
+
+// ---------- 404 Handler ----------
+app.use((req, res) => {
+  res.status(404).json({
+    error: "Route not found",
+  });
+});
+
+// ---------- Error Handler ----------
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({
+    error: "Internal server error",
+  });
+});
+
+export default app;
